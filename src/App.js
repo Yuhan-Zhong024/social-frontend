@@ -50,7 +50,7 @@ function App() {
             <PostFeed />
           </Col>
           <Col md={4}>
-            <UserInfo />
+          <UserInfo user={user} />
           </Col>
         </Row>
       </Container>
