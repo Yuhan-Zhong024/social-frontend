@@ -1,29 +1,55 @@
-import React, { useState } from "react";
-import { Card, Button, Form } from "react-bootstrap";
+import React, { useEffect, useState } from "react";
+import { Card, Image } from "react-bootstrap";
 
 function PostFeed() {
-  const [showCommentBox, setShowCommentBox] = useState(false);
+  const [posts, setPosts] = useState([]);
+
+  useEffect(() => {
+    fetch("http://127.0.0.1:5000/posts")
+      .then((res) => res.json())
+      .then((data) => setPosts(data))
+      .catch((err) => console.error("Failed to fetch posts:", err));
+  }, []);
 
   return (
-    <Card className="mb-3">
-      <Card.Body>
-        <Card.Title>Post Title</Card.Title>
-        <Card.Text>Post content goes here...</Card.Text>
-        <Button variant="link" onClick={() => setShowCommentBox(!showCommentBox)}>
-          Comment
-        </Button>
-        {showCommentBox && (
-          <Form className="mt-2">
-            <Form.Group>
-              <Form.Control type="text" placeholder="Write a comment..." />
-            </Form.Group>
-            <Button variant="primary" className="mt-2" type="submit">
-              Submit
-            </Button>
-          </Form>
-        )}
-      </Card.Body>
-    </Card>
+    <div style={{ maxHeight: "600px", overflowY: "scroll", padding: "10px" }}>
+      {posts.map((post) => (
+        <Card key={post.id} className="mb-3">
+          <Card.Body>
+            {/* User Info */}
+            <div className="d-flex align-items-center">
+              <Image
+                src={post.User.profile_picture}
+                roundedCircle
+                width={40}
+                height={40}
+                className="me-2"
+              />
+              <strong>{post.User.name}</strong>
+            </div>
+
+            {/* Post Content */}
+            <Card.Text className="mt-2">{post.content}</Card.Text>
+
+            {/* Display Post Images (if available) */}
+            {post.PostImages.length > 0 && (
+              <div className="d-flex flex-wrap">
+                {post.PostImages.map((img, index) => (
+                  <Image
+                  key={index}
+                  src={`http://localhost:5000${img.imageUrl}`} 
+                  thumbnail
+                  className="me-2 mb-2"
+                  style={{ maxWidth: "600px", maxHeight: "600px" }}
+                />
+                
+                ))}
+              </div>
+            )}
+          </Card.Body>
+        </Card>
+      ))}
+    </div>
   );
 }
 
