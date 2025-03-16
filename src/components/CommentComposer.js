@@ -85,39 +85,43 @@ function CommentComposer({ postId, user }) {
 
       {/* Comment List */}
       {comments.map((comment) => {
-        const profileUrl = comment.User?.profile_picture || "/default-avatar.png";
-        const userName = comment.User?.name || "Unknown";
+  const profileUrl = comment.User?.profile_picture || "/default-avatar.png";
+  const userName = comment.User?.name || "Unknown";
+  
+  // Format timestamp
+  const formattedTime = new Date(comment.createdAt).toLocaleString();
 
-        return (
-          <div
-            key={comment.id}
-            style={{
-              border: "1px solid #ccc",
-              marginBottom: "8px",
-              padding: "8px",
-              borderRadius: "5px",
-            }}
-          >
-            {/* User Info */}
-            <div className="d-flex align-items-center">
-              <Image
-                src={profileUrl}
-                roundedCircle
-                width={30}
-                height={30}
-                className="me-2"
-                alt="comment profile"
-              />
-              <strong>{userName}</strong>
-            </div>
+  return (
+    <div key={comment.id}
+      style={{
+        border: "1px solid #ccc",
+        marginBottom: "8px",
+        padding: "8px",
+        borderRadius: "5px",
+      }}
+    >
+      {/* User Info */}
+      <div className="d-flex align-items-center">
+        <Image
+          src={profileUrl}
+          roundedCircle
+          width={30}
+          height={30}
+          className="me-2"
+          alt="comment profile"
+        />
+        <strong>{userName}</strong>
+      </div>
 
-            {/* Comment Content */}
-            <div className="d-flex align-items-center justify-content-between" style={{ marginLeft: "35px" }}>
-              <p className="mb-0" style={{ marginRight: "10px" }}>{comment.content}</p>
-            </div>
-          </div>
-        );
-      })}
+      {/* Comment Content & Timestamp */}
+      <div className="d-flex align-items-center justify-content-between" style={{ marginLeft: "35px" }}>
+        <p className="mb-0" style={{ marginRight: "10px" }}>{comment.content}</p>
+        <small className="text-muted">{formattedTime}</small> {/* Show timestamp */}
+      </div>
+    </div>
+  );
+})}
+
     </div>
   );
 }

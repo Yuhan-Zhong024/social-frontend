@@ -1,69 +1,127 @@
-import React, { useState } from "react";
-import { Form, Button, Card } from "react-bootstrap";
+import React, { useState, useEffect } from "react";
+import { Image, Form, Button } from "react-bootstrap";
 
-function PostComposer({ user, onPostCreated }) {
-  const [content, setContent] = useState("");
-  const [images, setImages] = useState([]);
+function CommentComposer({ postId, user }) { 
+  const [comments, setComments] = useState([]);
+  const [newComment, setNewComment] = useState(""); 
 
-  const handleFileChange = (e) => {
-    setImages(e.target.files);
-  };
+  useEffect(() => {
+    const fetchComments = async () => {
+      try {
+        const token = localStorage.getItem("token");
 
-  const handlePostSubmit = async (e) => {
-    e.preventDefault();
-    if (!content.trim() && images.length === 0) return alert("Post cannot be empty!");
+        const response = await fetch(`http://127.0.0.1:5000/comments/post/${postId}`, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        });
 
-    const token = localStorage.getItem("token");
+        if (!response.ok) throw new Error("Failed to fetch comments");
 
-    const formData = new FormData();
-    formData.append("content", content);
-    for (let i = 0; i < images.length; i++) {
-      formData.append("images", images[i]);
-    }
+        const data = await response.json();
+        setComments(data); 
+      } catch (err) {
+        console.error("Failed to fetch comments:", err);
+      }
+    };
 
-    const response = await fetch("http://localhost:5000/posts", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-      body: formData,
-    });
+    fetchComments();
+  }, [postId]);
 
-    if (response.ok) {
-      setContent("");
-      setImages([]);
-      onPostCreated(); 
-    } else {
-      console.error("Failed to create post");
+  const handleSubmit = async (event) => {
+    event.preventDefault(); // Prevent page refresh
+
+    if (!newComment.trim() || !user) return; // Avoid empty comments
+
+    try {
+      const token = localStorage.getItem("token");
+
+      const response = await fetch(`http://127.0.0.1:5000/comments/post/${postId}`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ content: newComment }),
+      });
+
+      if (!response.ok) throw new Error("Failed to post comment");
+
+      const newCommentData = await response.json();
+
+      setComments([...comments, newCommentData]); // Append the new comment
+      setNewComment(""); // Clear input field
+
+    } catch (error) {
+      console.error("Error submitting comment:", error);
     }
   };
 
   return (
-    <Card className="mb-3">
-      <Card.Body>
-        <Form onSubmit={handlePostSubmit}>
-          <Form.Group controlId="postContent">
-            <Form.Control
-              as="textarea"
-              rows={2}
-              placeholder="What's on your mind?"
-              value={content}
-              onChange={(e) => setContent(e.target.value)}
-            />
-          </Form.Group>
+    <div style={{ marginTop: "10px" }}>
+      {/* Comment Input */}
+      <Form className="mt-3 mb-3 d-flex" onSubmit={handleSubmit}>
+        <Form.Control
+          type="text"
+          placeholder="Write a comment..."
+          value={newComment}
+          onChange={(e) => setNewComment(e.target.value)}
+          className="me-2 flex-grow-1"
+          style={{ height: "45px" }}
+        />
+        <Button variant="primary" type="submit">
+          Submit
+        </Button>
+      </Form>
 
-          {/* Image Upload */}
-          <Form.Group controlId="postImages" className="mt-2">
-            <Form.Control type="file" multiple onChange={handleFileChange} />
-          </Form.Group>
+      {/* Comment List */}
+      {comments.map((comment) => {
+  console.log("Rendering comment:", comment); // Debugging
 
-          <Button type="submit" variant="primary" className="mt-2">
-            Post
-          </Button>
-        </Form>
-      </Card.Body>
-    </Card>
+  const profileUrl = comment.User?.profile_picture || "/default-avatar.png";
+  const userName = comment.User?.name || "Unknown";
+  const formattedTime = comment.createdAt ? new Date(comment.createdAt).toLocaleString() : "Unknown time";
+
+  return (
+    <div
+      key={comment.id}
+      style={{
+        border: "1px solid #ccc",
+        marginBottom: "8px",
+        padding: "8px",
+        borderRadius: "5px",
+      }}
+    >
+      {/* User Info */}
+      <div className="d-flex align-items-center">
+        <Image
+          src={profileUrl}
+          roundedCircle
+          width={30}
+          height={30}
+          className="me-2"
+          alt="comment profile"
+        />
+        <strong>{userName}</strong>
+      </div>
+
+      {/* Comment Content */}
+      <div className="d-flex align-items-center justify-content-between" style={{ marginLeft: "35px" }}>
+        <p className="mb-0" style={{ marginRight: "10px" }}>{comment.content}</p>
+      </div>
+
+      {/* 🔥 Fix: Add Timestamp Div Here */}
+      <div className="text-muted" style={{ fontSize: "12px", marginLeft: "35px" }}>
+        {formattedTime} {/* Show formatted date/time */}
+      </div>
+    </div>
+  );
+})}
+
+    </div>
   );
 }
 
-export default PostComposer;
+export default CommentComposer;

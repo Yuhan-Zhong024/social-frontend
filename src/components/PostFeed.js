@@ -11,12 +11,12 @@ function PostFeed({ user, refresh }) {
       .then((res) => res.json())
       .then((data) => setPosts(data))
       .catch((err) => console.error("Failed to fetch posts:", err));
-  }, [refresh]); 
+  }, [refresh]);
 
   const toggleCommentBox = (postId) => {
     setShowCommentBox((prev) => ({
       ...prev,
-      [postId]: !prev[postId], 
+      [postId]: !prev[postId],
     }));
   };
 
@@ -35,6 +35,11 @@ function PostFeed({ user, refresh }) {
                 className="me-2"
               />
               <strong>{post.User?.name || "Unknown User"}</strong>
+            </div>
+
+            {/* Post Timestamp */}
+            <div className="text-muted" style={{ fontSize: "0.9em" }}>
+              {new Date(post.createdAt).toLocaleString()}
             </div>
 
             {/* Post Content */}
@@ -56,18 +61,12 @@ function PostFeed({ user, refresh }) {
             )}
 
             {/* show comment button */}
-            <Button
-              variant="link"
-              onClick={() => toggleCommentBox(post.id)}
-            >
+            <Button variant="link" onClick={() => toggleCommentBox(post.id)}>
               {showCommentBox[post.id] ? "Hide Comment" : "Show Comment"}
             </Button>
 
             {/* display comments*/}
-            {showCommentBox[post.id] && (
-              <CommentComposer postId={post.id} user={user} />
-            )}
-
+            {showCommentBox[post.id] && <CommentComposer postId={post.id} user={user} />}
           </Card.Body>
         </Card>
       ))}
