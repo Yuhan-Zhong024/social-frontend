@@ -48,7 +48,7 @@ function App() {
         <Row>
           <Col md={8}>
             {user && <PostComposer user={user} onPostCreated={() => setRefreshPosts(!refreshPosts)} />}
-            <PostFeed refresh={refreshPosts} />
+            <PostFeed user={user} refresh={refreshPosts} />
           </Col>
           <Col md={4}>
             <UserInfo user={user} />

@@ -32,7 +32,7 @@ function PostComposer({ user, onPostCreated }) {
     if (response.ok) {
       setContent("");
       setImages([]);
-      onPostCreated(); // Refresh post feed
+      onPostCreated(); 
     } else {
       console.error("Failed to create post");
     }

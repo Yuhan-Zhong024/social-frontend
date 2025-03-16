@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Card, Image, Button } from "react-bootstrap";
 import CommentComposer from "./CommentComposer";
 
-function PostFeed({ refresh }) {
+function PostFeed({ user, refresh }) {
   const [posts, setPosts] = useState([]);
   const [showCommentBox, setShowCommentBox] = useState({});
 
@@ -11,7 +11,7 @@ function PostFeed({ refresh }) {
       .then((res) => res.json())
       .then((data) => setPosts(data))
       .catch((err) => console.error("Failed to fetch posts:", err));
-  }, [refresh]); // <-- Rerun when refresh changes
+  }, [refresh]); 
 
   const toggleCommentBox = (postId) => {
     setShowCommentBox((prev) => ({
@@ -65,7 +65,7 @@ function PostFeed({ refresh }) {
 
             {/* display comments*/}
             {showCommentBox[post.id] && (
-              <CommentComposer postId={post.id} />
+              <CommentComposer postId={post.id} user={user} />
             )}
 
           </Card.Body>
