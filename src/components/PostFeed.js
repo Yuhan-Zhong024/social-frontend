@@ -1,8 +1,10 @@
 import React, { useEffect, useState } from "react";
 import { Card, Image, Button } from "react-bootstrap";
+import CommentComposer from "./CommentComposer";
 
 function PostFeed({ refresh }) {
   const [posts, setPosts] = useState([]);
+  const [showCommentBox, setShowCommentBox] = useState({});
 
   useEffect(() => {
     fetch("http://127.0.0.1:5000/posts")
@@ -10,6 +12,13 @@ function PostFeed({ refresh }) {
       .then((data) => setPosts(data))
       .catch((err) => console.error("Failed to fetch posts:", err));
   }, [refresh]); // <-- Rerun when refresh changes
+
+  const toggleCommentBox = (postId) => {
+    setShowCommentBox((prev) => ({
+      ...prev,
+      [postId]: !prev[postId], 
+    }));
+  };
 
   return (
     <div style={{ maxHeight: "600px", overflowY: "scroll", padding: "10px" }}>
@@ -45,6 +54,20 @@ function PostFeed({ refresh }) {
                 ))}
               </div>
             )}
+
+            {/* show comment button */}
+            <Button
+              variant="link"
+              onClick={() => toggleCommentBox(post.id)}
+            >
+              {showCommentBox[post.id] ? "Hide Comment" : "Show Comment"}
+            </Button>
+
+            {/* display comments*/}
+            {showCommentBox[post.id] && (
+              <CommentComposer postId={post.id} />
+            )}
+
           </Card.Body>
         </Card>
       ))}
