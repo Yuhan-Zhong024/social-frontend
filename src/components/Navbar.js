@@ -5,7 +5,7 @@ function AppNavbar({ user, handleLogout }) {
   return (
     <Navbar bg="primary" variant="dark" expand="lg">
       <Container>
-        <Navbar.Brand href="#">Social Media App</Navbar.Brand>
+        <Navbar.Brand href="#">Bluestrap</Navbar.Brand>
         <Navbar.Toggle aria-controls="basic-navbar-nav" />
         <Navbar.Collapse id="basic-navbar-nav">
           <Nav className="ms-auto d-flex align-items-center">

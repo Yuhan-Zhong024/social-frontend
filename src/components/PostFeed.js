@@ -4,14 +4,38 @@ import CommentComposer from "./CommentComposer";
 
 function PostFeed({ user, refresh }) {
   const [posts, setPosts] = useState([]);
+  const [likeCounts, setLikeCounts] = useState({});
   const [showCommentBox, setShowCommentBox] = useState({});
 
   useEffect(() => {
     fetch("http://127.0.0.1:5000/posts")
       .then((res) => res.json())
-      .then((data) => setPosts(data))
+      .then((data) => {
+        setPosts(data);
+        data.forEach((post) => fetchLikeCount(post.id));
+      })
       .catch((err) => console.error("Failed to fetch posts:", err));
   }, [refresh]);
+
+  const fetchLikeCount = (postId) => {
+    fetch(`http://127.0.0.1:5000/posts/${postId}/count`)
+      .then((res) => res.json())
+      .then((data) => setLikeCounts((prev) => ({ ...prev, [postId]: data.likeCount })))
+      .catch((err) => console.error("Failed to fetch like count:", err));
+  };
+
+  const handleLike = (postId) => {
+    fetch(`http://127.0.0.1:5000/posts/${postId}/like`, {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${localStorage.getItem("token")}`, 
+        "Content-Type": "application/json",
+      },
+    })
+      .then((res) => res.json())
+      .then(() => fetchLikeCount(postId)) 
+      .catch((err) => console.error("Failed to like post:", err));
+  };
 
   const toggleCommentBox = (postId) => {
     setShowCommentBox((prev) => ({
@@ -60,12 +84,19 @@ function PostFeed({ user, refresh }) {
               </div>
             )}
 
-            {/* show comment button */}
-            <Button variant="link" onClick={() => toggleCommentBox(post.id)}>
-              {showCommentBox[post.id] ? "Hide Comment" : "Show Comment"}
-            </Button>
+            {/* Like Button & Like Count */}
+            <div className="d-flex align-items-center">
+              <Button variant="outline-primary" size="sm" onClick={() => handleLike(post.id)}>
+                👍 Like {likeCounts[post.id] !== undefined ? likeCounts[post.id] : ""}
+              </Button>
 
-            {/* display comments*/}
+              {/* Show Comment Button */}
+              <Button variant="link" className="ms-3" onClick={() => toggleCommentBox(post.id)}>
+                {showCommentBox[post.id] ? "Hide Comment" : "Show Comment"}
+              </Button>
+            </div>
+
+            {/* Display Comments */}
             {showCommentBox[post.id] && <CommentComposer postId={post.id} user={user} />}
           </Card.Body>
         </Card>
