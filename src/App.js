@@ -11,6 +11,7 @@ import "bootstrap/dist/css/bootstrap.min.css";
 function App() {
   const [user, setUser] = useState(null);
   const location = useLocation();
+  const [refreshPosts, setRefreshPosts] = useState(false);
 
   useEffect(() => {
     const queryParams = new URLSearchParams(location.search);
@@ -19,7 +20,7 @@ function App() {
     if (token) {
       localStorage.setItem("token", token);
       fetchUser(token);
-      window.history.replaceState({}, document.title, "/"); // Remove token from URL
+      window.history.replaceState({}, document.title, "/");
     } else {
       const storedToken = localStorage.getItem("token");
       if (storedToken) fetchUser(storedToken);
@@ -36,7 +37,7 @@ function App() {
   };
 
   const handleLogout = () => {
-    localStorage.removeItem("token"); 
+    localStorage.removeItem("token");
     setUser(null);
   };
 
@@ -46,11 +47,11 @@ function App() {
       <Container className="mt-4">
         <Row>
           <Col md={8}>
-            <PostComposer />
-            <PostFeed />
+            {user && <PostComposer user={user} onPostCreated={() => setRefreshPosts(!refreshPosts)} />}
+            <PostFeed refresh={refreshPosts} />
           </Col>
           <Col md={4}>
-          <UserInfo user={user} />
+            <UserInfo user={user} />
           </Col>
         </Row>
       </Container>

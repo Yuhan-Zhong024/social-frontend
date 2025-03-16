@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
-import { Card, Image } from "react-bootstrap";
+import { Card, Image, Button } from "react-bootstrap";
 
-function PostFeed() {
+function PostFeed({ refresh }) {
   const [posts, setPosts] = useState([]);
 
   useEffect(() => {
@@ -9,7 +9,7 @@ function PostFeed() {
       .then((res) => res.json())
       .then((data) => setPosts(data))
       .catch((err) => console.error("Failed to fetch posts:", err));
-  }, []);
+  }, [refresh]); // <-- Rerun when refresh changes
 
   return (
     <div style={{ maxHeight: "600px", overflowY: "scroll", padding: "10px" }}>
@@ -19,30 +19,29 @@ function PostFeed() {
             {/* User Info */}
             <div className="d-flex align-items-center">
               <Image
-                src={post.User.profile_picture}
+                src={post.User?.profile_picture || "https://via.placeholder.com/40"}
                 roundedCircle
                 width={40}
                 height={40}
                 className="me-2"
               />
-              <strong>{post.User.name}</strong>
+              <strong>{post.User?.name || "Unknown User"}</strong>
             </div>
 
             {/* Post Content */}
             <Card.Text className="mt-2">{post.content}</Card.Text>
 
             {/* Display Post Images (if available) */}
-            {post.PostImages.length > 0 && (
+            {post.PostImages?.length > 0 && (
               <div className="d-flex flex-wrap">
                 {post.PostImages.map((img, index) => (
                   <Image
-                  key={index}
-                  src={`http://localhost:5000${img.imageUrl}`} 
-                  thumbnail
-                  className="me-2 mb-2"
-                  style={{ maxWidth: "600px", maxHeight: "600px" }}
-                />
-                
+                    key={index}
+                    src={`http://localhost:5000${img.imageUrl}`}
+                    thumbnail
+                    className="me-2 mb-2"
+                    style={{ maxWidth: "600px", maxHeight: "600px" }}
+                  />
                 ))}
               </div>
             )}
