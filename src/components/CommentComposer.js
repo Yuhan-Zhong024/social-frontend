@@ -4,6 +4,7 @@ import { Image, Form, Button } from "react-bootstrap";
 function CommentComposer({ postId, user }) { 
   const [comments, setComments] = useState([]);
   const [newComment, setNewComment] = useState("");
+  const [likeCounts, setLikeCounts] = useState({});
 
   useEffect(() => {
     const fetchComments = async () => {
@@ -22,6 +23,13 @@ function CommentComposer({ postId, user }) {
 
         const data = await response.json();
         setComments(data);
+
+        data.forEach((comment) => {
+          if (comment.id) {
+            fetchLikeCount(comment.id);
+          }
+        });
+
       } catch (err) {
         console.error("Failed to fetch comments:", err);
       }
@@ -29,6 +37,17 @@ function CommentComposer({ postId, user }) {
 
     fetchComments();
   }, [postId]);
+
+  const fetchLikeCount = async (commentId) => {
+    try {
+      const res = await fetch(`http://127.0.0.1:5000/comments/${commentId}/count`);
+      if (!res.ok) throw new Error("Failed to fetch like count");
+      const data = await res.json(); 
+      setLikeCounts((prev) => ({ ...prev, [commentId]: data.likeCount }));
+    } catch (error) {
+      console.error("Failed to fetch like count:", error);
+    }
+  };
 
   const handleSubmit = async (event) => {
     event.preventDefault(); 
@@ -56,13 +75,34 @@ function CommentComposer({ postId, user }) {
 
       setComments([...comments, { 
         ...newCommentData, 
-        User: { name: user.name, profile_picture: user.profile_picture } 
+        User: { name: user.name, profile_picture: user.profile_picture }
       }]); 
+
+      if (newCommentData.id) {
+        setLikeCounts((prev) => ({ ...prev, [newCommentData.id]: 0 }));
+      }
 
       setNewComment("");
 
     } catch (error) {
       console.error("Error submitting comment:", error);
+    }
+  };
+
+  const handleLike = async (commentId) => {
+    try {
+      const token = localStorage.getItem("token");
+      const res = await fetch(`http://127.0.0.1:5000/comments/${commentId}/like`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        }
+      });
+      if (!res.ok) throw new Error("Failed to like comment");
+      fetchLikeCount(commentId);
+    } catch (error) {
+      console.error("Error liking comment:", error);
     }
   };
 
@@ -116,7 +156,20 @@ function CommentComposer({ postId, user }) {
       {/* Comment Content & Timestamp */}
       <div className="d-flex align-items-center justify-content-between" style={{ marginLeft: "35px" }}>
         <p className="mb-0" style={{ marginRight: "10px" }}>{comment.content}</p>
-        <small className="text-muted">{formattedTime}</small> {/* Show timestamp */}
+        <div>
+          <Button
+            variant="outline-primary"
+            size="sm"
+            onClick={() => handleLike(comment.id)}
+            style={{marginRight:"10px"}}
+          >
+            👍 Like{" "}
+            {likeCounts[comment.id] !== undefined ? likeCounts[comment.id] : ""}
+          </Button>
+          <small className="text-muted me-2">
+            {formattedTime}
+          </small>
+        </div>
       </div>
     </div>
   );
