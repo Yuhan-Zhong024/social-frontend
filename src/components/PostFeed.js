@@ -91,7 +91,7 @@ function PostFeed({ user, refresh }) {
               </Button>
 
               {/* Show Comment Button */}
-              <Button variant="link" className="ms-3" onClick={() => toggleCommentBox(post.id)}>
+              <Button variant="outline-primary" className="ms-3" size="sm" onClick={() => toggleCommentBox(post.id)}>
                 {showCommentBox[post.id] ? "Hide Comment" : "Show Comment"}
               </Button>
             </div>
