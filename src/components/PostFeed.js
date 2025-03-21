@@ -75,7 +75,7 @@ function PostFeed({ user, refresh }) {
                 {post.PostImages.map((img, index) => (
                   <Image
                     key={index}
-                    src={`http://localhost:5000${img.imageUrl}`}
+                    src={img.imageUrl}
                     thumbnail
                     className="me-2 mb-2"
                     style={{ maxWidth: "600px", maxHeight: "600px" }}
